@@ -1,5 +1,5 @@
 const {User} = require ('./models/Users')
-const {TeeTimes} = require('./models/TeeTimes')
+const {TeeTime} = require('./models/TeeTimes')
 
 const express = require('express')
 const mongoose = require('mongoose') 
@@ -40,7 +40,7 @@ app.use(bodyParser.json())
 
 function checkUser(req, res, next) {
     console.log('checking user')
-    if (req.session.user._id) {
+    if (req.session.user && req.session.user._id) {
         console.log('user is logged in')
         next()
     } else {
@@ -49,13 +49,39 @@ function checkUser(req, res, next) {
     }
 }
 
-app.get('/', checkUser, (req, res) => {
-    
-    res.send('Hello')
-})
+function sendTeeTimes(req, res) {
+    console.log('sending tee times')
+    const username = req.session && req.session.user ? req.session.user.name : ''
+    getTeeTimes(username)
+    .then(teeTimes => res.send(teeTimes))
+}
+
+function getTeeTimes(name) {
+    console.log('getting tee times')
+    // get all tee times
+    return TeeTime.find()
+    .then(teeTimes => {
+        // get the user
+        return User.findOne({name})
+        .then(user => {
+            return {
+                user,
+                teeTimes
+            }
+        })
+        .catch(err => {
+            return {
+                user: {},
+                teeTimes
+            }
+        })
+    })
+}
+
+app.get('/', sendTeeTimes)
 
 // create user
-app.post('/register', (req, res) => {
+app.post('/register', (req, res, next) => {
     console.log('adding new user')
     const name = req.body.name.toLowerCase()
     const password = req.body.password
@@ -65,51 +91,53 @@ app.post('/register', (req, res) => {
     const pwhash = bcrypt.hashSync(password, salt)
     const newUser = new User({name, pwhash})
     newUser.save(err => {
-        if (err) {
-            console.log(err)
-        } else {
-            res.redirect('/')
-        }
+        if (err) return handleError(err)
     })
-})
+    console.log('new user saved')
+    req.session.user = newUser
+    next()
+}, sendTeeTimes)
 
 // retrieve user
-app.post('/login', (req, res) => {
+app.post('/login', (req, res, next) => {
     console.log('logging in user')
     const name = req.body.name.toLowerCase()
     const password = req.body.password
     User.findOne({name})
     .then(user => {
         if (bcrypt.compareSync(password, user.pwhash)) {
+            console.log('good password')
             req.session.user = user
-            res.redirect('/')
-        } else {
-            console.log('bad password')
-            res.send()
-        }
+        } 
+        next()
+        // else {
+        //     console.log('bad password')
+        //     res.send()
+        // }
     })
     .catch(() => {
         console.log('username not found')
-        res.send()
+        next()
+        // res.send()
     })
-})
+}, sendTeeTimes)
 
 // update user
-app.get('/logout', (req, res) => {
+app.get('/logout', (req, res, next) => {
     console.log('logging out user')
     req.session.destroy()
-    res.send()
-})
+    next()
+}, sendTeeTimes)
 
-app.post('/', checkUser, (req, res) => {
+app.post('/', checkUser, (req, res, next) => {
     console.log('updating new user')
-    res.send()
-})
+    next()
+}, sendTeeTimes)
 
 // delete user
-// app.delete('/user', (req, res) => {
-//     console.log('deleting new user')
-//     res.send()
-// }) 
+app.delete('/user', (req, res) => {
+    console.log('deleting new user')
+    res.send()
+}) 
 
 app.listen(port, () => console.log(`My Tee Times App listening on port ${port}!`))
