@@ -42,7 +42,15 @@ app.get('/', (req, res) => {
 })
 
 app.post('/user', (req, res) => {
-    res.send('adding new user')
+    console.log('adding new user')
 })
 
-app.listen(port, () => console.log(`My Task App listening on port ${port}!`))
+app.post('/updateUser', (req, res) => {
+    console.log('updating new user')
+})
+
+app.delete('/user', (req, res) => {
+    console.log('deleting new user')
+})
+
+app.listen(port, () => console.log(`My Tee Times App listening on port ${port}!`))
