@@ -38,22 +38,41 @@ app.use(bodyParser.urlencoded({extended: false}))
 
 app.use(bodyParser.json())
 
-app.get('/', (req, res) => {
+function checkUser(req, res, next) {
+    console.log('checking user')
+    if (req.session.user._id) {
+        console.log('user is logged in')
+        next()
+    } else {
+        console.log('user is NOT logged in')
+        res.redirect('/login')
+    }
+}
+
+app.get('/', checkUser, (req, res) => {
+    
     res.send('Hello')
 })
 
-app.post('/user', (req, res) => {
+// create user
+app.post('/register', (req, res) => {
     console.log('adding new user')
     const name = req.body.name.toLowerCase()
     const password = req.body.password
+    const saltRounds = 10
     const salt = bcrypt.genSaltSync(saltRounds);
     const pwhash = bcrypt.hashSync(password, salt)
     const newUser = new User({name, pwhash})
     newUser.save(err => {
-        if (err) console.log(err)
+        if (err) {
+            console.log(err)
+        } else {
+            res.redirect('/')
+        }
     })
 })
 
+// retrieve user
 app.post('/login', (req, res) => {
     console.log('logging in user')
     const name = req.body.name.toLowerCase()
@@ -74,19 +93,22 @@ app.post('/login', (req, res) => {
     })
 })
 
+// update user
 app.get('/logout', (req, res) => {
     console.log('logging out user')
+    req.session.destroy()
     res.send()
 })
 
-app.post('/updateUser', (req, res) => {
+app.post('/', checkUser, (req, res) => {
     console.log('updating new user')
     res.send()
 })
 
-app.delete('/user', (req, res) => {
-    console.log('deleting new user')
-    res.send()
-}) 
+// delete user
+// app.delete('/user', (req, res) => {
+//     console.log('deleting new user')
+//     res.send()
+// }) 
 
 app.listen(port, () => console.log(`My Tee Times App listening on port ${port}!`))
