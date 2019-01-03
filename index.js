@@ -59,6 +59,7 @@ app.post('/register', (req, res) => {
     console.log('adding new user')
     const name = req.body.name.toLowerCase()
     const password = req.body.password
+    console.log(password);
     const saltRounds = 10
     const salt = bcrypt.genSaltSync(saltRounds);
     const pwhash = bcrypt.hashSync(password, salt)
