@@ -5,8 +5,8 @@ const {TeeTimeSchema} = require('./TeeTimes')
 
 const UserSchema = new Schema({
     name: String,
+    pwhash: String,
     teeTimes: [TeeTimeSchema],
-    pwhash: String
 })
 
 const User = mongoose.model('User', UserSchema)
