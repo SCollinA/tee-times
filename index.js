@@ -41,4 +41,8 @@ app.get('/', (req, res) => {
     res.send('Hello')
 })
 
+app.post('/user', (req, res) => {
+    res.send('adding new user')
+})
+
 app.listen(port, () => console.log(`My Task App listening on port ${port}!`))
