@@ -50,10 +50,12 @@ function checkUser(req, res, next) {
 }
 
 function sendTeeTimes(req, res) {
-    console.log('sending tee times')
     const username = req.session && req.session.user ? req.session.user.name : ''
     getTeeTimes(username)
-    .then(teeTimes => res.send(teeTimes))
+    .then(teeTimes => {
+        console.log('sending tee times')
+        return res.send(teeTimes)
+    })
 }
 
 function getTeeTimes(name) {
@@ -80,7 +82,7 @@ function getTeeTimes(name) {
 
 app.get('/', sendTeeTimes)
 
-// create user
+// create user 
 app.post('/register', (req, res, next) => {
     console.log('adding new user')
     const name = req.body.name.toLowerCase()
