@@ -45,6 +45,13 @@ app.post('/user', (req, res) => {
     console.log('adding new user')
 })
 
+app.post('/login', (req, res) => {
+    console.log('logging in user')
+})
+
+app.get('/logout', (req, res) => {
+    console.log('logging out')
+})
 app.post('/updateUser', (req, res) => {
     console.log('updating new user')
 })
