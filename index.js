@@ -161,17 +161,9 @@ app.post('/teetime', checkUser, (req, res, next) => {
     console.log('adding new teetime')
     const teeTime = req.body.teeTime
     console.log(teeTime)
-    // User.findOne({name: req.session.user.name})
-    // .then(user => {
     const newTeeTime = new TeeTime({...teeTime})
-        // user.teeTimes.push(newTeeTime)
-        // user.save(err => {
-        //     if (err) return handleError(err)
-        // })
     newTeeTime.save()
-    // })
     .then(() => next())
-    // })
 }, sendTeeTimes)
 
 // update tee time
