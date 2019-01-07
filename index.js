@@ -99,12 +99,15 @@ app.post('/register', (req, res, next) => {
     const salt = bcrypt.genSaltSync(saltRounds);
     const pwhash = bcrypt.hashSync(password, salt)
     const newUser = new User({name, pwhash})
-    newUser.save(err => {
-        if (err) return handleError(err)
+    newUser.save((err, user) => {
+        if (err) {
+            return handleError(err)
+        } else {
+            console.log('new user saved')
+            req.session.user = user
+            next()
+        }
     })
-    console.log('new user saved')
-    req.session.user = newUser
-    next()
 }, sendTeeTimes)
 
 // retrieve user
