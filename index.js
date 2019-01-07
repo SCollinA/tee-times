@@ -62,20 +62,28 @@ function getTeeTimes(name) {
     console.log('getting tee times')
     // get all tee times
     return TeeTime.find()
-    .then(teeTimes => {
-        // get the user
-        return User.findOne({name})
-        .then(user => {
-            return {
-                user,
-                teeTimes
-            }
-        })
-        .catch(err => {
-            return {
-                user: {},
-                teeTimes
-            }
+    .then(allTeeTimes => {
+        // get all users
+        return User.find()
+        .then(allUsers => {
+            // get the user
+            return User.findOne({name})
+            .then(user => {
+                const userTeeTimes = allTeeTimes.filter(teeTime => teeTime.golfers.map(golfer => golfer._id).includes(user._id))
+                return {
+                    user,
+                    userTeeTimes,
+                    allUsers,
+                    allTeeTimes
+                }
+            })
+            .catch(err => {
+                return {
+                    user: {},
+                    allUsers,
+                    allTeeTimes
+                }
+            })
         })
     })
 }
@@ -146,23 +154,19 @@ app.delete('/user', (req, res) => {
 // create tee time
 app.post('/teetime', checkUser, (req, res, next) => {
     console.log('adding new teetime')
-    const date = req.body.teeTime
-    const golfers = req.body.golfers
-    User.findOne({name: req.session.user.name})
-    .then(user => {
-        golfers.push(user)
-        const newTeeTime = new TeeTime({date, golfers})
+    const teeTime = req.body.teeTime
+    console.log(teeTime)
+    // User.findOne({name: req.session.user.name})
+    // .then(user => {
+    const newTeeTime = new TeeTime({...teeTime})
         // user.teeTimes.push(newTeeTime)
         // user.save(err => {
         //     if (err) return handleError(err)
         // })
-        newTeeTime.save(err => {
-            if (err) return handleError(err)
-        })
-    })
-    .then(() => {
-        next()
-    })
+    newTeeTime.save()
+    // })
+    .then(() => next())
+    // })
 }, sendTeeTimes)
 
 // update tee time
