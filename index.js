@@ -69,13 +69,15 @@ function getTeeTimes(name) {
             // get the user
             return User.findOne({name})
             .then(user => {
-                const userTeeTimes = allTeeTimes.filter(teeTime => teeTime.golfers.map(golfer => golfer._id).includes(user._id))
-                return {
-                    user,
-                    userTeeTimes,
-                    allUsers,
-                    allTeeTimes
-                }
+                return TeeTime.find({ golfers: {$all: [user]}})
+                .then(userTeeTimes => {
+                    return {
+                        user,
+                        userTeeTimes,
+                        allUsers,
+                        allTeeTimes
+                    }
+                })
             })
             .catch(err => {
                 return {
