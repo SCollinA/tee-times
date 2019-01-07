@@ -179,7 +179,8 @@ app.post('/updateTeeTime', checkUser, (req, res, next) => {
     const updatingTeeTime = req.body.teeTime
     // try to find existing tee time
     TeeTime.find({date: updatingTeeTime.date}, (err, results) => {
-        if (results.length > 0) {
+        // there are already tee times at that time and they are not the new tee time
+        if (results.length > 0 && !results.map(result => result._id.toString()).includes(updatingTeeTime._id)) {
             console.log('tee time already exists')
             next()
         } else { // if no existing tee time found, update tee time
