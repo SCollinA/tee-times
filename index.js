@@ -82,6 +82,7 @@ function getTeeTimes(name) {
             .catch(err => {
                 return {
                     user: {},
+                    userTeeTimes: [],
                     allUsers,
                     allTeeTimes
                 }
@@ -90,7 +91,7 @@ function getTeeTimes(name) {
     })
 }
 
-app.get('/', sendTeeTimes)
+app.get('/data', sendTeeTimes)
 
 // create user 
 app.post('/register', (req, res, next) => {
