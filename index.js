@@ -160,18 +160,17 @@ app.delete('/user', (req, res) => {
 app.post('/teetime', checkUser, (req, res, next) => {
     console.log('adding new teetime')
     const teeTime = req.body.teeTime
-    console.log(teeTime)
-    // User.findOne({name: req.session.user.name})
-    // .then(user => {
-    const newTeeTime = new TeeTime({...teeTime})
-        // user.teeTimes.push(newTeeTime)
-        // user.save(err => {
-        //     if (err) return handleError(err)
-        // })
-    newTeeTime.save()
-    // })
-    .then(() => next())
-    // })
+    // try to find existing tee time
+    TeeTime.find({date: teeTime.date}, (err, res) => {
+        if (res.length > 0) {
+            console.log('tee time already exists')
+            next()
+        } else { // if no existing tee time found, add new tee time
+            const newTeeTime = new TeeTime({...teeTime})
+            newTeeTime.save()
+            .then(() => next())
+        }
+    })
 }, sendTeeTimes)
 
 // update tee time
