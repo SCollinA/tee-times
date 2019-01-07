@@ -3,7 +3,6 @@ const Schema = mongoose.Schema
 
 const {UserSchema} = require('./Users')
 
-
 const TeeTimeSchema = new Schema({
     date: Date,
     golfers: [UserSchema]

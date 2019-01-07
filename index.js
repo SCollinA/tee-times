@@ -130,9 +130,11 @@ app.get('/logout', (req, res, next) => {
     next()
 }, sendTeeTimes)
 
-app.post('/', checkUser, (req, res, next) => {
-    console.log('updating new user')
-    next()
+app.post('/updateUser', checkUser, (req, res, next) => {
+    console.log('updating user')
+    const updatingUser = req.body.user
+    User.findByIdAndUpdate(updatingUser._id, {...updatingUser})
+    .then(() => next())
 }, sendTeeTimes)
 
 // delete user
@@ -164,7 +166,12 @@ app.post('/teetime', checkUser, (req, res, next) => {
 }, sendTeeTimes)
 
 // update tee time
-app.post()
+app.post('/updateTeeTime', checkUser, (req, res, next) => {
+    console.log('updating tee time')
+    const updatingTeeTime = req.body.teeTime
+    TeeTime.findByIdAndUpdate(updatingTeeTime._id, {...updatingTeeTime})
+    .then(() => next())
+}, sendTeeTimes)
 
 // delete tee time
 app.delete('/teetime', checkUser, (req, res, next) => {
