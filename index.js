@@ -62,20 +62,30 @@ function getTeeTimes(name) {
     console.log('getting tee times')
     // get all tee times
     return TeeTime.find()
-    .then(teeTimes => {
-        // get the user
-        return User.findOne({name})
-        .then(user => {
-            return {
-                user,
-                teeTimes
-            }
-        })
-        .catch(err => {
-            return {
-                user: {},
-                teeTimes
-            }
+    .then(allTeeTimes => {
+        // get all users
+        return User.find()
+        .then(allUsers => {
+            // get the user
+            return User.findOne({name})
+            .then(user => {
+                return TeeTime.find({ golfers: {$all: [user]}})
+                .then(userTeeTimes => {
+                    return {
+                        user,
+                        userTeeTimes,
+                        allUsers,
+                        allTeeTimes
+                    }
+                })
+            })
+            .catch(err => {
+                return {
+                    user: {},
+                    allUsers,
+                    allTeeTimes
+                }
+            })
         })
     })
 }
@@ -91,12 +101,15 @@ app.post('/register', (req, res, next) => {
     const salt = bcrypt.genSaltSync(saltRounds);
     const pwhash = bcrypt.hashSync(password, salt)
     const newUser = new User({name, pwhash})
-    newUser.save(err => {
-        if (err) return handleError(err)
+    newUser.save((err, user) => {
+        if (err) {
+            return handleError(err)
+        } else {
+            console.log('new user saved')
+            req.session.user = user
+            next()
+        }
     })
-    console.log('new user saved')
-    req.session.user = newUser
-    next()
 }, sendTeeTimes)
 
 // retrieve user
@@ -130,9 +143,11 @@ app.get('/logout', (req, res, next) => {
     next()
 }, sendTeeTimes)
 
-app.post('/', checkUser, (req, res, next) => {
-    console.log('updating new user')
-    next()
+app.post('/updateUser', checkUser, (req, res, next) => {
+    console.log('updating user')
+    const updatingUser = req.body.user
+    User.findByIdAndUpdate(updatingUser._id, {...updatingUser})
+    .then(() => next())
 }, sendTeeTimes)
 
 // delete user
@@ -144,22 +159,34 @@ app.delete('/user', (req, res) => {
 // create tee time
 app.post('/teetime', checkUser, (req, res, next) => {
     console.log('adding new teetime')
-    const date = req.body.teeTime
-    const newTeeTime = new TeeTime({date})
-    User.findOne({name: req.session.user.name})
-    .then(user => {
-        user.teeTimes.push(newTeeTime)
-        user.save(err => {
-            if (err) return handleError(err)
-        })
-    })
-    .then(() => {
-        next()
-    })
+    const teeTime = req.body.teeTime
+    console.log(teeTime)
+    // User.findOne({name: req.session.user.name})
+    // .then(user => {
+    const newTeeTime = new TeeTime({...teeTime})
+        // user.teeTimes.push(newTeeTime)
+        // user.save(err => {
+        //     if (err) return handleError(err)
+        // })
+    newTeeTime.save()
+    // })
+    .then(() => next())
+    // })
 }, sendTeeTimes)
 
 // update tee time
+app.post('/updateTeeTime', checkUser, (req, res, next) => {
+    console.log('updating tee time')
+    const updatingTeeTime = req.body.teeTime
+    TeeTime.findByIdAndUpdate(updatingTeeTime._id, {...updatingTeeTime})
+    .then(() => next())
+}, sendTeeTimes)
 
 // delete tee time
+app.delete('/teetime', checkUser, (req, res, next) => {
+    console.log('deleting tee time')
+    TeeTime.findByIdAndDelete(req.body.teeTime._id)
+    .then(() => next())
+}, sendTeeTimes)
 
 app.listen(port, () => console.log(`My Tee Times App listening on port ${port}!`))
