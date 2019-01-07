@@ -146,7 +146,7 @@ app.get('/logout', (req, res, next) => {
 app.post('/updateUser', checkUser, (req, res, next) => {
     console.log('updating user')
     const updatingUser = req.body.user
-    User.findByIdAndUpdate(updatingUser._id, {...updatingUser})
+    User.update({_id: updatingUser._id}, {...updatingUser})
     .then(() => next())
 }, sendTeeTimes)
 
@@ -161,8 +161,8 @@ app.post('/teetime', checkUser, (req, res, next) => {
     console.log('adding new teetime')
     const teeTime = req.body.teeTime
     // try to find existing tee time
-    TeeTime.find({date: teeTime.date}, (err, res) => {
-        if (res.length > 0) {
+    TeeTime.find({date: teeTime.date}, (err, results) => {
+        if (results.length > 0) {
             console.log('tee time already exists')
             next()
         } else { // if no existing tee time found, add new tee time
@@ -177,14 +177,23 @@ app.post('/teetime', checkUser, (req, res, next) => {
 app.post('/updateTeeTime', checkUser, (req, res, next) => {
     console.log('updating tee time')
     const updatingTeeTime = req.body.teeTime
-    TeeTime.findByIdAndUpdate(updatingTeeTime._id, {...updatingTeeTime})
-    .then(() => next())
+    // try to find existing tee time
+    TeeTime.find({date: updatingTeeTime.date}, (err, results) => {
+        if (results.length > 0) {
+            console.log('tee time already exists')
+            next()
+        } else { // if no existing tee time found, update tee time
+            TeeTime.updateOne({_id: updatingTeeTime._id}, {...updatingTeeTime})
+            .then(() => next())
+        }
+    })
+
 }, sendTeeTimes)
 
 // delete tee time
 app.delete('/teetime', checkUser, (req, res, next) => {
     console.log('deleting tee time')
-    TeeTime.findByIdAndDelete(req.body.teeTime._id)
+    TeeTime.deleteOne({_id: req.body.teeTime._id})
     .then(() => next())
 }, sendTeeTimes)
 
