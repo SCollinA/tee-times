@@ -145,11 +145,16 @@ app.delete('/user', (req, res) => {
 app.post('/teetime', checkUser, (req, res, next) => {
     console.log('adding new teetime')
     const date = req.body.teeTime
-    const newTeeTime = new TeeTime({date})
+    const golfers = req.body.golfers
     User.findOne({name: req.session.user.name})
     .then(user => {
-        user.teeTimes.push(newTeeTime)
-        user.save(err => {
+        golfers.push(user)
+        const newTeeTime = new TeeTime({date, golfers})
+        // user.teeTimes.push(newTeeTime)
+        // user.save(err => {
+        //     if (err) return handleError(err)
+        // })
+        newTeeTime.save(err => {
             if (err) return handleError(err)
         })
     })
@@ -159,7 +164,13 @@ app.post('/teetime', checkUser, (req, res, next) => {
 }, sendTeeTimes)
 
 // update tee time
+app.post()
 
 // delete tee time
+app.delete('/teetime', checkUser, (req, res, next) => {
+    console.log('deleting tee time')
+    TeeTime.findByIdAndDelete(req.body.teeTime._id)
+    .then(() => next())
+}, sendTeeTimes)
 
 app.listen(port, () => console.log(`My Tee Times App listening on port ${port}!`))
