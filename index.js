@@ -154,6 +154,7 @@ app.post('/updateUser', checkUser, (req, res, next) => {
 // delete user
 app.delete('/user', (req, res) => {
     console.log('deleting new user')
+    //provide implementation here
     res.send()
 }) 
 
