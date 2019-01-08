@@ -163,13 +163,13 @@ app.post('/requestFriend', checkUser, (req, res, next) => {
     .then(() => next())
 }, sendTeeTimes)
 
-app.post('/addFriend', checkUser, (req, res, next) => {
-    console.log('adding friend')
-    const {addingFriend, addedFriend} = req.body
-    const friendshipID =  addingFriend.friendRequests.find(friendRequest => addedFriend.requestedFriends.includes(friendRequest))
+app.post('/approveFriend', checkUser, (req, res, next) => {
+    console.log('approving friend')
+    const {approvingFriend, approvedFriend} = req.body
+    const friendshipID =  approvingFriend.friendRequests.find(friendRequest => approvedFriend.requestedFriends.includes(friendRequest))
     // they swap friendshipIDs :')
-    User.update({_id: addingFriend._id}, {friends: [...addingFriend.friends, friendshipID]})
-    .then(() => User.update({_id: addedFriend._id}, {friends: [...addedFriend.friends, friendshipID]}))
+    User.update({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, friendshipID]})
+    .then(() => User.update({_id: approvedFriend._id}, {friends: [...approvedFriend.friends, friendshipID]}))
     .then(() => next())
 }, sendTeeTimes)
 
