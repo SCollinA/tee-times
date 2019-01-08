@@ -99,7 +99,6 @@ app.post('/register', (req, res, next) => {
     const name = req.body.name.toLowerCase()
     User.find({name}, (err, res) => {
         if (res.length === 0) {
-
             const password = req.body.password
             const userType = req.body.userType
             const saltRounds = 10
