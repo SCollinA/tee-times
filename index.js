@@ -70,12 +70,14 @@ function getTeeTimes(_id) {
             return User.findOne({_id})
             .then(user => {
                 const userFriends = allUsers.filter(golfer => {
-                    console.log(golfer)
-                    return user.friends.find(friendshipID => {
-                        return golfer.friends.map(friendID => friendID.toString()).includes(friendshipID.toString())
-                    })
+                    if (golfer._id.toString() === user._id.toString()) {
+                        return false
+                    } else {
+                        return user.friends.find(friendshipID => {
+                            return golfer.friends.map(friendID => friendID.toString()).includes(friendshipID.toString())
+                        })
+                    }
                 })
-                console.log(userFriends)
                 return TeeTime.find({ golfers: {$all: [user]}})
                 .then(userTeeTimes => {
                     return {
@@ -174,8 +176,8 @@ app.post('/approveFriend', checkUser, (req, res, next) => {
     const {approvingFriend, approvedFriend} = req.body
     const friendshipID =  approvingFriend.friendRequests.find(friendRequest => approvedFriend.requestedFriends.includes(friendRequest))
     // they swap friendshipIDs :')
-    User.updateOne({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, friendshipID]})
-    .then(() => User.updateOne({_id: approvedFriend._id}, {friends: [...approvedFriend.friends, friendshipID]}))
+    User.updateOne({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, friendshipID], friendRequests: approvingFriend.friendRequests.filter(friendRequest => friendRequest.toString() !== friendshipID.toString())})
+    .then(() => User.updateOne({_id: approvedFriend._id}, {friends: [...approvedFriend.friends, friendshipID], requestedFriends: approvedFriend.requestedFriends.filter(requestedFriend => requestedFriend.toString() !== friendshipID.toString())}))
     .then(() => next())
 }, sendTeeTimes)
 
@@ -183,8 +185,8 @@ app.post('/denyFriend', checkUser, (req, res, next) => {
     console.log('denying friend')
     const {denyingFriend, deniedFriend} = req.body
     const friendshipID =  denyingFriend.friendRequests.find(friendRequest => deniedFriend.requestedFriends.includes(friendRequest))
-    User.updateOne({_id: denyingFriend._id}, {friendRequests: denyingFriend.friendRequests.filter(friendRequest => friendRequest !== friendshipID)})
-    .then(() => User.updateOne({_id: deniedFriend._id}, {requestedFriends: deniedFriend.requestedFriends.filter(requestedFriend => requestedFriend !== friendshipID)}))
+    User.updateOne({_id: denyingFriend._id}, {friendRequests: denyingFriend.friendRequests.filter(friendRequest => friendRequest.toString() !== friendshipID.toString())})
+    .then(() => User.updateOne({_id: deniedFriend._id}, {requestedFriends: deniedFriend.requestedFriends.filter(requestedFriend => requestedFriend.toString() !== friendshipID.toString())}))
     .then(() => next())
 }, sendTeeTimes)
 
