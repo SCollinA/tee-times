@@ -3,7 +3,7 @@ const {TeeTime} = require('./models/TeeTimes')
 
 const express = require('express')
 const mongoose = require('mongoose') 
-const {ObjectId} = mongoose.Schema.Types
+const {ObjectId} = mongoose.Types
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
@@ -156,10 +156,10 @@ app.get('/logout', (req, res, next) => {
 
 app.post('/requestFriend', checkUser, (req, res, next) => {
     console.log('requesting friend')
-    const {requestingUser, requestedFriend} = req.body
+    const {requestingFriend, requestedFriend} = req.body
     const friendshipID = new ObjectId()
-    User.update({_id: requestingUser._id}, {requestedFriends: [...requestingUser.requestedFriends, friendshipID]})
-    .then(() => User.update({_id: requestedFriend._id}, {friendRequests: [...requestedFriend.friendRequests, friendshipID]}))
+    User.updateOne({_id: requestingFriend._id}, {requestedFriends: [...requestingFriend.requestedFriends, friendshipID]})
+    .then(() => User.updateOne({_id: requestedFriend._id}, {friendRequests: [...requestedFriend.friendRequests, friendshipID]}))
     .then(() => next())
 }, sendTeeTimes)
 
@@ -168,8 +168,8 @@ app.post('/approveFriend', checkUser, (req, res, next) => {
     const {approvingFriend, approvedFriend} = req.body
     const friendshipID =  approvingFriend.friendRequests.find(friendRequest => approvedFriend.requestedFriends.includes(friendRequest))
     // they swap friendshipIDs :')
-    User.update({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, friendshipID]})
-    .then(() => User.update({_id: approvedFriend._id}, {friends: [...approvedFriend.friends, friendshipID]}))
+    User.updateOne({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, friendshipID]})
+    .then(() => User.updateOne({_id: approvedFriend._id}, {friends: [...approvedFriend.friends, friendshipID]}))
     .then(() => next())
 }, sendTeeTimes)
 
@@ -177,8 +177,8 @@ app.post('/denyFriend', checkUser, (req, res, next) => {
     console.log('denying friend')
     const {denyingFriend, deniedFriend} = req.body
     const friendshipID =  denyingFriend.friendRequests.find(friendRequest => deniedFriend.requestedFriends.includes(friendRequest))
-    User.update({_id: denyingFriend._id}, {friendRequests: denyingFriend.friendRequests.filter(friendRequest => friendRequest !== friendshipID)})
-    .then(() => User.update({_id: deniedFriend._id}, {requestedFriends: deniedFriend.requestedFriends.filter(requestedFriend => requestedFriend !== friendshipID)}))
+    User.updateOne({_id: denyingFriend._id}, {friendRequests: denyingFriend.friendRequests.filter(friendRequest => friendRequest !== friendshipID)})
+    .then(() => User.updateOne({_id: deniedFriend._id}, {requestedFriends: deniedFriend.requestedFriends.filter(requestedFriend => requestedFriend !== friendshipID)}))
     .then(() => next())
 }, sendTeeTimes)
 
@@ -186,15 +186,15 @@ app.post('/removeFriend', checkUser, (req, res, next) => {
     console.log('removing friend')
     const {removingFriend, removedFriend} = req.body
     const friendshipID =  removingFriend.friends.find(friendRequest => removedFriend.friends.includes(friendRequest))
-    User.update({_id: removingFriend._id}, {friends: removingFriend.friends.filter(friend => friend !== friendshipID)})
-    .then(() => User.update({_id: removedFriend._id}, {friends: removedFriend.friends.filter(friend => friend !== friendshipID)}))
+    User.updateOne({_id: removingFriend._id}, {friends: removingFriend.friends.filter(friend => friend !== friendshipID)})
+    .then(() => User.updateOne({_id: removedFriend._id}, {friends: removedFriend.friends.filter(friend => friend !== friendshipID)}))
     .then(() => next())
 }, sendTeeTimes)
 
 app.post('/updateUser', checkUser, (req, res, next) => {
     console.log('updating user')
     const updatingUser = req.body.user
-    User.update({_id: updatingUser._id}, {...updatingUser})
+    User.updateOne({_id: updatingUser._id}, {...updatingUser})
     .then(() => next())
 }, sendTeeTimes)
 
