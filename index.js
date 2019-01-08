@@ -82,6 +82,7 @@ function getTeeTimes(name) {
             .catch(err => {
                 return {
                     user: {},
+                    userTeeTimes: [],
                     allUsers,
                     allTeeTimes
                 }
@@ -90,7 +91,7 @@ function getTeeTimes(name) {
     })
 }
 
-app.get('/', sendTeeTimes)
+app.get('/data', sendTeeTimes)
 
 // create user 
 app.post('/register', (req, res, next) => {
@@ -101,7 +102,7 @@ app.post('/register', (req, res, next) => {
     const saltRounds = 10
     const salt = bcrypt.genSaltSync(saltRounds);
     const pwhash = bcrypt.hashSync(password, salt)
-    const newUser = new User({name, pwhash})
+    const newUser = new User({name, pwhash, userType})
     newUser.save((err, user) => {
         if (err) {
             return handleError(err)
@@ -154,6 +155,7 @@ app.post('/updateUser', checkUser, (req, res, next) => {
 // delete user
 app.delete('/user', (req, res) => {
     console.log('deleting new user')
+    //provide implementation here
     res.send()
 }) 
 
@@ -180,7 +182,8 @@ app.post('/updateTeeTime', checkUser, (req, res, next) => {
     const updatingTeeTime = req.body.teeTime
     // try to find existing tee time
     TeeTime.find({date: updatingTeeTime.date}, (err, results) => {
-        if (results.length > 0) {
+        // there are already tee times at that time and they are not the new tee time
+        if (results.length > 0 && !results.map(result => result._id.toString()).includes(updatingTeeTime._id)) {
             console.log('tee time already exists')
             next()
         } else { // if no existing tee time found, update tee time
