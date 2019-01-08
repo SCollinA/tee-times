@@ -97,18 +97,26 @@ app.get('/data', sendTeeTimes)
 app.post('/register', (req, res, next) => {
     console.log('adding new user')
     const name = req.body.name.toLowerCase()
-    const password = req.body.password
-    const userType = req.body.userType
-    const saltRounds = 10
-    const salt = bcrypt.genSaltSync(saltRounds);
-    const pwhash = bcrypt.hashSync(password, salt)
-    const newUser = new User({name, pwhash, userType})
-    newUser.save((err, user) => {
-        if (err) {
-            return handleError(err)
+    User.find({name}, (err, res) => {
+        if (res.length === 0) {
+
+            const password = req.body.password
+            const userType = req.body.userType
+            const saltRounds = 10
+            const salt = bcrypt.genSaltSync(saltRounds);
+            const pwhash = bcrypt.hashSync(password, salt)
+            const newUser = new User({name, pwhash, userType})
+            newUser.save((err, user) => {
+                if (err) {
+                    return handleError(err)
+                } else {
+                    console.log('new user saved')
+                    req.session.user = user
+                    next()
+                }
+            })
         } else {
-            console.log('new user saved')
-            req.session.user = user
+            console.log('user name taken')
             next()
         }
     })
