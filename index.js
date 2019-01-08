@@ -3,7 +3,7 @@ const {TeeTime} = require('./models/TeeTimes')
 
 const express = require('express')
 const mongoose = require('mongoose') 
-const {ObjectId} = require('mongodb')
+const {ObjectId} = mongoose.Schema.Types
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
@@ -69,10 +69,12 @@ function getTeeTimes(name) {
             // get the user
             return User.findOne({name})
             .then(user => {
+                const userFriends = allUsers.filter(golfer => user.friends.find(friendshipID => golfer.friends.includes(friendshipID)))
                 return TeeTime.find({ golfers: {$all: [user]}})
                 .then(userTeeTimes => {
                     return {
                         user,
+                        userFriends,
                         userTeeTimes,
                         allUsers,
                         allTeeTimes
@@ -150,6 +152,43 @@ app.get('/logout', (req, res, next) => {
     console.log('logging out user')
     req.session.destroy()
     next()
+}, sendTeeTimes)
+
+app.post('/requestFriend', checkUser, (req, res, next) => {
+    console.log('requesting friend')
+    const {requestingUser, requestedFriend} = req.body
+    const friendshipID = new ObjectId()
+    User.update({_id: requestingUser._id}, {requestedFriends: [...requestingUser.requestedFriends, friendshipID]})
+    .then(() => User.update({_id: requestedFriend._id}, {friendRequests: [...requestedFriend.friendRequests, friendshipID]}))
+    .then(() => next())
+}, sendTeeTimes)
+
+app.post('/approveFriend', checkUser, (req, res, next) => {
+    console.log('approving friend')
+    const {approvingFriend, approvedFriend} = req.body
+    const friendshipID =  approvingFriend.friendRequests.find(friendRequest => approvedFriend.requestedFriends.includes(friendRequest))
+    // they swap friendshipIDs :')
+    User.update({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, friendshipID]})
+    .then(() => User.update({_id: approvedFriend._id}, {friends: [...approvedFriend.friends, friendshipID]}))
+    .then(() => next())
+}, sendTeeTimes)
+
+app.post('/denyFriend', checkUser, (req, res, next) => {
+    console.log('denying friend')
+    const {denyingFriend, deniedFriend} = req.body
+    const friendshipID =  denyingFriend.friendRequests.find(friendRequest => deniedFriend.requestedFriends.includes(friendRequest))
+    User.update({_id: denyingFriend._id}, {friendRequests: denyingFriend.friendRequests.filter(friendRequest => friendRequest !== friendshipID)})
+    .then(() => User.update({_id: deniedFriend._id}, {requestedFriends: deniedFriend.requestedFriends.filter(requestedFriend => requestedFriend !== friendshipID)}))
+    .then(() => next())
+}, sendTeeTimes)
+
+app.post('/removeFriend', checkUser, (req, res, next) => {
+    console.log('removing friend')
+    const {removingFriend, removedFriend} = req.body
+    const friendshipID =  removingFriend.friends.find(friendRequest => removedFriend.friends.includes(friendRequest))
+    User.update({_id: removingFriend._id}, {friends: removingFriend.friends.filter(friend => friend !== friendshipID)})
+    .then(() => User.update({_id: removedFriend._id}, {friends: removedFriend.friends.filter(friend => friend !== friendshipID)}))
+    .then(() => next())
 }, sendTeeTimes)
 
 app.post('/updateUser', checkUser, (req, res, next) => {
