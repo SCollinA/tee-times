@@ -50,15 +50,15 @@ function checkUser(req, res, next) {
 }
 
 function sendTeeTimes(req, res) {
-    const username = req.session && req.session.user ? req.session.user.name : ''
-    getTeeTimes(username)
+    const userID = req.session && req.session.user ? req.session.user._id : ''
+    getTeeTimes(userID)
     .then(teeTimes => {
         console.log('sending tee times')
         return res.send(teeTimes)
     })
 }
 
-function getTeeTimes(name) {
+function getTeeTimes(_id) {
     console.log('getting tee times')
     // get all tee times
     return TeeTime.find()
@@ -67,9 +67,15 @@ function getTeeTimes(name) {
         return User.find()
         .then(allUsers => {
             // get the user
-            return User.findOne({name})
+            return User.findOne({_id})
             .then(user => {
-                const userFriends = allUsers.filter(golfer => user.friends.find(friendshipID => golfer.friends.includes(friendshipID)))
+                const userFriends = allUsers.filter(golfer => {
+                    console.log(golfer)
+                    return user.friends.find(friendshipID => {
+                        return golfer.friends.map(friendID => friendID.toString()).includes(friendshipID.toString())
+                    })
+                })
+                console.log(userFriends)
                 return TeeTime.find({ golfers: {$all: [user]}})
                 .then(userTeeTimes => {
                     return {
