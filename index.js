@@ -3,7 +3,7 @@ const {TeeTime} = require('./models/TeeTimes')
 
 const express = require('express')
 const mongoose = require('mongoose') 
-const {ObjectId} = mongoose.Types
+const {ObjectId} = mongoose.Schema.Types
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
@@ -69,10 +69,12 @@ function getTeeTimes(name) {
             // get the user
             return User.findOne({name})
             .then(user => {
+                const userFriends = allUsers.filter(golfer => user.friends.find(friendshipID => golfer.friends.includes(friendshipID)))
                 return TeeTime.find({ golfers: {$all: [user]}})
                 .then(userTeeTimes => {
                     return {
                         user,
+                        userFriends,
                         userTeeTimes,
                         allUsers,
                         allTeeTimes
