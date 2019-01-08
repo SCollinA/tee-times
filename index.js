@@ -156,7 +156,7 @@ app.get('/logout', (req, res, next) => {
 
 app.post('/requestFriend', checkUser, (req, res, next) => {
     console.log('requesting friend')
-    const {requestingUser, requestedFriend} = req.body.friends
+    const {requestingUser, requestedFriend} = req.body
     const friendshipID = new ObjectId()
     User.update({_id: requestingUser._id}, {requestedFriends: [...requestingUser.requestedFriends, friendshipID]})
     .then(() => User.update({_id: requestedFriend._id}, {friendRequests: [...requestedFriend.friendRequests, friendshipID]}))
@@ -165,7 +165,7 @@ app.post('/requestFriend', checkUser, (req, res, next) => {
 
 app.post('/approveFriend', checkUser, (req, res, next) => {
     console.log('approving friend')
-    const {approvingFriend, approvedFriend} = req.body.friends
+    const {approvingFriend, approvedFriend} = req.body
     const friendshipID =  approvingFriend.friendRequests.find(friendRequest => approvedFriend.requestedFriends.includes(friendRequest))
     // they swap friendshipIDs :')
     User.update({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, friendshipID]})
@@ -175,7 +175,7 @@ app.post('/approveFriend', checkUser, (req, res, next) => {
 
 app.post('/denyFriend', checkUser, (req, res, next) => {
     console.log('denying friend')
-    const {denyingFriend, deniedFriend} = req.body.friends
+    const {denyingFriend, deniedFriend} = req.body
     const friendshipID =  denyingFriend.friendRequests.find(friendRequest => deniedFriend.requestedFriends.includes(friendRequest))
     User.update({_id: denyingFriend._id}, {friendRequests: denyingFriend.friendRequests.filter(friendRequest => friendRequest !== friendshipID)})
     .then(() => User.update({_id: deniedFriend._id}, {requestedFriends: deniedFriend.requestedFriends.filter(requestedFriend => requestedFriend !== friendshipID)}))
@@ -184,7 +184,7 @@ app.post('/denyFriend', checkUser, (req, res, next) => {
 
 app.post('/removeFriend', checkUser, (req, res, next) => {
     console.log('removing friend')
-    const {removingFriend, removedFriend} = req.body.friends
+    const {removingFriend, removedFriend} = req.body
     const friendshipID =  removingFriend.friends.find(friendRequest => removedFriend.friends.includes(friendRequest))
     User.update({_id: removingFriend._id}, {friends: removingFriend.friends.filter(friend => friend !== friendshipID)})
     .then(() => User.update({_id: removedFriend._id}, {friends: removedFriend.friends.filter(friend => friend !== friendshipID)}))
