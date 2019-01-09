@@ -6,7 +6,8 @@ const {UserSchema} = require('./Users')
 const TeeTimeSchema = new Schema({
     teeType: String,
     date: Date,
-    golfers: [UserSchema]
+    golfers: [UserSchema],
+    guests: Number
 })
 
 const TeeTime = mongoose.model('TeeTime', TeeTimeSchema)
