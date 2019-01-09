@@ -4,6 +4,7 @@ const Schema = mongoose.Schema
 const {UserSchema} = require('./Users')
 
 const TeeTimeSchema = new Schema({
+    teeType: String,
     date: Date,
     golfers: [UserSchema]
 })
