@@ -3,7 +3,7 @@ const {TeeTime} = require('./models/TeeTimes')
 
 const express = require('express')
 const mongoose = require('mongoose') 
-const {ObjectId} = require('mongodb')
+const {ObjectId} = mongoose.Types
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
@@ -50,15 +50,15 @@ function checkUser(req, res, next) {
 }
 
 function sendTeeTimes(req, res) {
-    const username = req.session && req.session.user ? req.session.user.name : ''
-    getTeeTimes(username)
+    const userID = req.session && req.session.user ? req.session.user._id : ''
+    getTeeTimes(userID)
     .then(teeTimes => {
         console.log('sending tee times')
         return res.send(teeTimes)
     })
 }
 
-function getTeeTimes(name) {
+function getTeeTimes(_id) {
     console.log('getting tee times')
     // get all tee times
     return TeeTime.find()
@@ -67,12 +67,22 @@ function getTeeTimes(name) {
         return User.find()
         .then(allUsers => {
             // get the user
-            return User.findOne({name})
+            return User.findOne({_id})
             .then(user => {
+                const userFriends = allUsers.filter(golfer => {
+                    if (golfer._id.toString() === user._id.toString()) {
+                        return false
+                    } else {
+                        return user.friends.find(friendshipID => {
+                            return golfer.friends.map(friendID => friendID.toString()).includes(friendshipID.toString())
+                        })
+                    }
+                })
                 return TeeTime.find({ golfers: {$all: [user]}})
                 .then(userTeeTimes => {
                     return {
                         user,
+                        userFriends,
                         userTeeTimes,
                         allUsers,
                         allTeeTimes
@@ -97,18 +107,25 @@ app.get('/data', sendTeeTimes)
 app.post('/register', (req, res, next) => {
     console.log('adding new user')
     const name = req.body.name.toLowerCase()
-    const password = req.body.password
-    console.log(password);
-    const saltRounds = 10
-    const salt = bcrypt.genSaltSync(saltRounds);
-    const pwhash = bcrypt.hashSync(password, salt)
-    const newUser = new User({name, pwhash, userType})
-    newUser.save((err, user) => {
-        if (err) {
-            return handleError(err)
+    User.find({name}, (err, res) => {
+        if (res.length === 0) {
+            const password = req.body.password
+            const userType = req.body.userType
+            const saltRounds = 10
+            const salt = bcrypt.genSaltSync(saltRounds);
+            const pwhash = bcrypt.hashSync(password, salt)
+            const newUser = new User({name, pwhash, userType})
+            newUser.save((err, user) => {
+                if (err) {
+                    return handleError(err)
+                } else {
+                    console.log('new user saved')
+                    req.session.user = user
+                    next()
+                }
+            })
         } else {
-            console.log('new user saved')
-            req.session.user = user
+            console.log('user name taken')
             next()
         }
     })
@@ -145,10 +162,47 @@ app.get('/logout', (req, res, next) => {
     next()
 }, sendTeeTimes)
 
+app.post('/requestFriend', checkUser, (req, res, next) => {
+    console.log('requesting friend')
+    const {requestingFriend, requestedFriend} = req.body
+    const friendshipID = new ObjectId()
+    User.updateOne({_id: requestingFriend._id}, {requestedFriends: [...requestingFriend.requestedFriends, friendshipID]})
+    .then(() => User.updateOne({_id: requestedFriend._id}, {friendRequests: [...requestedFriend.friendRequests, friendshipID]}))
+    .then(() => next())
+}, sendTeeTimes)
+
+app.post('/approveFriend', checkUser, (req, res, next) => {
+    console.log('approving friend')
+    const {approvingFriend, approvedFriend} = req.body
+    const friendshipID =  approvingFriend.friendRequests.find(friendRequest => approvedFriend.requestedFriends.includes(friendRequest))
+    // they swap friendshipIDs :')
+    User.updateOne({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, friendshipID], friendRequests: approvingFriend.friendRequests.filter(friendRequest => friendRequest.toString() !== friendshipID.toString())})
+    .then(() => User.updateOne({_id: approvedFriend._id}, {friends: [...approvedFriend.friends, friendshipID], requestedFriends: approvedFriend.requestedFriends.filter(requestedFriend => requestedFriend.toString() !== friendshipID.toString())}))
+    .then(() => next())
+}, sendTeeTimes)
+
+app.post('/denyFriend', checkUser, (req, res, next) => {
+    console.log('denying friend')
+    const {denyingFriend, deniedFriend} = req.body
+    const friendshipID =  denyingFriend.friendRequests.find(friendRequest => deniedFriend.requestedFriends.includes(friendRequest))
+    User.updateOne({_id: denyingFriend._id}, {friendRequests: denyingFriend.friendRequests.filter(friendRequest => friendRequest.toString() !== friendshipID.toString())})
+    .then(() => User.updateOne({_id: deniedFriend._id}, {requestedFriends: deniedFriend.requestedFriends.filter(requestedFriend => requestedFriend.toString() !== friendshipID.toString())}))
+    .then(() => next())
+}, sendTeeTimes)
+
+app.post('/removeFriend', checkUser, (req, res, next) => {
+    console.log('removing friend')
+    const {removingFriend, removedFriend} = req.body
+    const friendshipID =  removingFriend.friends.find(friendRequest => removedFriend.friends.includes(friendRequest))
+    User.updateOne({_id: removingFriend._id}, {friends: removingFriend.friends.filter(friend => friend !== friendshipID)})
+    .then(() => User.updateOne({_id: removedFriend._id}, {friends: removedFriend.friends.filter(friend => friend !== friendshipID)}))
+    .then(() => next())
+}, sendTeeTimes)
+
 app.post('/updateUser', checkUser, (req, res, next) => {
     console.log('updating user')
     const updatingUser = req.body.user
-    User.update({_id: updatingUser._id}, {...updatingUser})
+    User.updateOne({_id: updatingUser._id}, {...updatingUser})
     .then(() => next())
 }, sendTeeTimes)
 
