@@ -73,9 +73,7 @@ function getTeeTimes(_id) {
                     if (golfer._id.toString() === user._id.toString()) {
                         return false
                     } else {
-                        return user.friends.find(friendshipID => {
-                            return golfer.friends.map(friendID => friendID.toString()).includes(friendshipID.toString())
-                        })
+                        return user.friends.find(friendshipID => golfer._id.toString() == friendshipID)
                     }
                 })
                 return TeeTime.find({ golfers: {$all: [user]}})
