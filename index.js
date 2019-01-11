@@ -90,6 +90,7 @@ function getTeeTimes(_id) {
             .catch(err => {
                 return {
                     user: {},
+                    userFriends: [],
                     userTeeTimes: [],
                     allUsers,
                     allTeeTimes
@@ -142,14 +143,12 @@ app.post('/login', (req, res, next) => {
         } 
         else {
             console.log('bad password')
-            //     res.send()
         }
         next()
     })
     .catch(() => {
         console.log('username not found')
         next()
-        // res.send()
     })
 }, sendTeeTimes)
 
