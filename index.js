@@ -172,28 +172,25 @@ app.post('/requestFriend', checkUser, (req, res, next) => {
 app.post('/approveFriend', checkUser, (req, res, next) => {
     console.log('approving friend')
     const {approvingFriend, approvedFriend} = req.body
-    const friendshipID =  approvingFriend.friendRequests.find(friendRequest => approvedFriend.requestedFriends.includes(friendRequest))
     // they swap friendshipIDs :')
-    User.updateOne({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, friendshipID], friendRequests: approvingFriend.friendRequests.filter(friendRequest => friendRequest.toString() !== friendshipID.toString())})
-    .then(() => User.updateOne({_id: approvedFriend._id}, {friends: [...approvedFriend.friends, friendshipID], requestedFriends: approvedFriend.requestedFriends.filter(requestedFriend => requestedFriend.toString() !== friendshipID.toString())}))
+    User.updateOne({_id: approvingFriend._id}, {friends: [...approvingFriend.friends, approvedFriend._id], friendRequests: approvingFriend.friendRequests.filter(friendRequest => friendRequest.toString() !== approvedFriend._id.toString())})
+    .then(() => User.updateOne({_id: approvedFriend._id}, {friends: [...approvedFriend.friends, approvingFriend._id], requestedFriends: approvedFriend.requestedFriends.filter(requestedFriend => requestedFriend.toString() !== approvingFriend._id.toString())}))
     .then(() => next())
 }, sendTeeTimes)
 
 app.post('/denyFriend', checkUser, (req, res, next) => {
     console.log('denying friend')
     const {denyingFriend, deniedFriend} = req.body
-    const friendshipID =  denyingFriend.friendRequests.find(friendRequest => deniedFriend.requestedFriends.includes(friendRequest))
-    User.updateOne({_id: denyingFriend._id}, {friendRequests: denyingFriend.friendRequests.filter(friendRequest => friendRequest.toString() !== friendshipID.toString())})
-    .then(() => User.updateOne({_id: deniedFriend._id}, {requestedFriends: deniedFriend.requestedFriends.filter(requestedFriend => requestedFriend.toString() !== friendshipID.toString())}))
+    User.updateOne({_id: denyingFriend._id}, {friendRequests: denyingFriend.friendRequests.filter(friendRequest => friendRequest.toString() !== deniedFriend._id.toString())})
+    .then(() => User.updateOne({_id: deniedFriend._id}, {requestedFriends: deniedFriend.requestedFriends.filter(requestedFriend => requestedFriend.toString() !== denyingFriend._id.toString())}))
     .then(() => next())
 }, sendTeeTimes)
 
 app.post('/removeFriend', checkUser, (req, res, next) => {
     console.log('removing friend')
     const {removingFriend, removedFriend} = req.body
-    const friendshipID =  removingFriend.friends.find(friendRequest => removedFriend.friends.includes(friendRequest))
-    User.updateOne({_id: removingFriend._id}, {friends: removingFriend.friends.filter(friend => friend !== friendshipID)})
-    .then(() => User.updateOne({_id: removedFriend._id}, {friends: removedFriend.friends.filter(friend => friend !== friendshipID)}))
+    User.updateOne({_id: removingFriend._id}, {friends: removingFriend.friends.filter(friend => friend._id.toString() !== removedFriend._id.toString())})
+    .then(() => User.updateOne({_id: removedFriend._id}, {friends: removedFriend.friends.filter(friend => friend._id.toString() !== removingFriend._id.toString())}))
     .then(() => next())
 }, sendTeeTimes)
 
