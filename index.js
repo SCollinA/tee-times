@@ -155,8 +155,7 @@ app.post('/login', (req, res, next) => {
 // update user
 app.get('/logout', (req, res, next) => {
     console.log('logging out user')
-    req.session.destroy()
-    next()
+    req.session.destroy(err => next())
 }, sendTeeTimes)
 
 app.post('/requestFriend', checkUser, (req, res, next) => {
