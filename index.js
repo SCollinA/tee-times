@@ -212,7 +212,7 @@ app.delete('/user', (req, res) => {
 app.post('/teetime', checkUser, (req, res, next) => {
     console.log('adding new teetime')
     const teeTime = req.body.teeTime
-    // try to find existing tee time
+    // try to find existing tee time 
     TeeTime.find({date: teeTime.date}, (err, results) => {
         if (results.length > 0) {
             console.log('tee time already exists')
