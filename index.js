@@ -113,24 +113,20 @@ app.post('/register', (req, res, next) => {
             const saltRounds = 10
             const salt = bcrypt.genSaltSync(saltRounds);
             const pwhash = bcrypt.hashSync(password, salt)
-            axios.get(`http://localhost:3000/${picture}`)
-            .then(res => Buffer.from(res.data))
-            .then(picture => {
-                const newUser = new User({
-                    name, 
-                    pwhash, 
-                    picture, 
-                    userType
-                })
-                newUser.save((err, user) => {
-                    if (err) {
-                        return handleError(err)
-                    } else {
-                        console.log('new user saved')
-                        req.session.user = user
-                        next()
-                    }
-                })
+            const newUser = new User({
+                name, 
+                pwhash, 
+                picture, 
+                userType
+            })
+            newUser.save((err, user) => {
+                if (err) {
+                    return handleError(err)
+                } else {
+                    console.log('new user saved')
+                    req.session.user = user
+                    next()
+                }
             })
         } else {
             console.log('user name taken')
