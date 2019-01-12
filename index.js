@@ -212,8 +212,13 @@ app.post('/updateUser', checkUser, (req, res, next) => {
                     pwhash,
                 })
             .then(() => {
-                console.log('user updated')
-                next()
+                User.findById(updatingUser._id)
+                .then(user => {
+                    // update session user also
+                    req.session.user = user
+                    console.log('user updated')
+                    next()
+                })
             })
         } 
         else {
