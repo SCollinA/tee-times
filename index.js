@@ -216,7 +216,7 @@ app.post('/updateUser', checkUser, (req, res, next) => {
                     name: newUsername,
                     // either use the new hash password or the old one if not updated
                     pwhash: pwhash,
-                    picture: Buffer.from(newPicture)
+                    picture: newPicture
                 }
             ).then(() => {
                 User.findById(updatingUser._id)
