@@ -51,6 +51,7 @@ function checkUser(req, res, next) {
 
 function sendTeeTimes(req, res) {
     const userID = req.session && req.session.user ? req.session.user._id : ''
+    console.log(userID)
     getTeeTimes(userID)
     .then(teeTimes => {
         console.log('sending tee times')
@@ -213,8 +214,8 @@ app.post('/updateUser', checkUser, (req, res, next) => {
                     name: newUsername,
                     // either use the new hash password or the old one if not updated
                     pwhash: pwhash,
-                })
-            .then(() => {
+                }
+            ).then(() => {
                 User.findById(updatingUser._id)
                 .then(user => {
                     // update session user also
@@ -226,8 +227,8 @@ app.post('/updateUser', checkUser, (req, res, next) => {
         } 
         else {
             console.log('bad password')
+            next()
         }
-        next()
     })
     .catch(() => {
         console.log('username not found')
