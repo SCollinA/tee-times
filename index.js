@@ -194,9 +194,34 @@ app.post('/removeFriend', checkUser, (req, res, next) => {
 
 app.post('/updateUser', checkUser, (req, res, next) => {
     console.log('updating user')
-    const updatingUser = req.body.user
-    User.updateOne({_id: updatingUser._id}, {...updatingUser})
-    .then(() => next())
+    const updatingUser = req.body
+    const {name, currentPassword, newPassword} = req.body
+    const newUsername = updatingUser.newUsername.toLowerCase()
+    User.findOne({name})
+    .then(user => {
+        if (bcrypt.compareSync(currentPassword, user.pwhash)) {
+            console.log('good password')
+            // update the user here
+            const saltRounds = 10
+            const salt = bcrypt.genSaltSync(saltRounds);
+            const pwhash = bcrypt.hashSync(password, salt)
+            User.updateOne({_id: updatingUser._id}, 
+                {
+                    ...updatingUser, 
+                    name: newUsername,
+                    pwhash,
+                })
+            .then(() => next())
+        } 
+        else {
+            console.log('bad password')
+        }
+        next()
+    })
+    .catch(() => {
+        console.log('username not found')
+        next()
+    })
 }, sendTeeTimes)
 
 // delete user
