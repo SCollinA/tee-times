@@ -9,7 +9,6 @@ const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
 const assert = require('assert')
 const bcrypt = require('bcrypt')
-const axios = require('axios')
 
 const app = express()
 const port = 3003
