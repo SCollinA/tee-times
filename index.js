@@ -9,6 +9,7 @@ const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
 const assert = require('assert')
 const bcrypt = require('bcrypt')
+const axios = require('axios')
 
 const app = express()
 const port = 3003
@@ -51,7 +52,6 @@ function checkUser(req, res, next) {
 
 function sendTeeTimes(req, res) {
     const userID = req.session && req.session.user ? req.session.user._id : ''
-    console.log(userID)
     getTeeTimes(userID)
     .then(teeTimes => {
         console.log('sending tee times')
@@ -113,15 +113,24 @@ app.post('/register', (req, res, next) => {
             const saltRounds = 10
             const salt = bcrypt.genSaltSync(saltRounds);
             const pwhash = bcrypt.hashSync(password, salt)
-            const newUser = new User({name, pwhash, picture, userType})
-            newUser.save((err, user) => {
-                if (err) {
-                    return handleError(err)
-                } else {
-                    console.log('new user saved')
-                    req.session.user = user
-                    next()
-                }
+            axios.get(`http://localhost:3000/${picture}`)
+            .then(res => Buffer.from(res.data))
+            .then(picture => {
+                const newUser = new User({
+                    name, 
+                    pwhash, 
+                    picture, 
+                    userType
+                })
+                newUser.save((err, user) => {
+                    if (err) {
+                        return handleError(err)
+                    } else {
+                        console.log('new user saved')
+                        req.session.user = user
+                        next()
+                    }
+                })
             })
         } else {
             console.log('user name taken')
