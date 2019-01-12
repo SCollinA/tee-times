@@ -144,8 +144,8 @@ app.post('/login', (req, res, next) => {
         } 
         else {
             console.log('bad password')
-            next()
         }
+        next()
     })
     .catch(() => {
         console.log('username not found')
