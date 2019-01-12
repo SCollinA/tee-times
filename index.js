@@ -216,7 +216,7 @@ app.post('/updateUser', checkUser, (req, res, next) => {
                     name: newUsername,
                     // either use the new hash password or the old one if not updated
                     pwhash: pwhash,
-                    picture: newPicture
+                    picture: Buffer.from(new Uint8Array(newPicture))
                 }
             ).then(() => {
                 User.findById(updatingUser._id)
@@ -233,8 +233,8 @@ app.post('/updateUser', checkUser, (req, res, next) => {
             next()
         }
     })
-    .catch(() => {
-        console.log('username not found')
+    .catch(err => {
+        console.log(err)
         next()
     })
 }, sendTeeTimes)
