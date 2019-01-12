@@ -3,7 +3,6 @@ const {TeeTime} = require('./models/TeeTimes')
 
 const express = require('express')
 const mongoose = require('mongoose') 
-const {ObjectId} = mongoose.Types
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
@@ -165,7 +164,6 @@ app.get('/logout', (req, res, next) => {
 app.post('/requestFriend', checkUser, (req, res, next) => {
     console.log('requesting friend')
     const {requestingFriend, requestedFriend} = req.body
-    // const friendshipID = new ObjectId()
     User.updateOne({_id: requestingFriend._id}, {requestedFriends: [...requestingFriend.requestedFriends, requestedFriend._id]})
     .then(() => User.updateOne({_id: requestedFriend._id}, {friendRequests: [...requestedFriend.friendRequests, requestingFriend._id]}))
     .then(() => next())
