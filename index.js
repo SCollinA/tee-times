@@ -203,15 +203,18 @@ app.post('/updateUser', checkUser, (req, res, next) => {
             console.log('good password')
             // update the user here
             const saltRounds = 10
-            const salt = bcrypt.genSaltSync(saltRounds);
-            const pwhash = bcrypt.hashSync(password, salt)
+            const salt = bcrypt.genSaltSync(saltRounds)
+            const pwhash = bcrypt.hashSync(newPassword, salt)
             User.updateOne({_id: updatingUser._id}, 
                 {
                     ...updatingUser, 
                     name: newUsername,
                     pwhash,
                 })
-            .then(() => next())
+            .then(() => {
+                console.log('user updated')
+                next()
+            })
         } 
         else {
             console.log('bad password')
