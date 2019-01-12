@@ -7,6 +7,7 @@ const {ObjectId} = mongoose.Schema.Types
 const UserSchema = new Schema({
     name: String,
     pwhash: String,
+    picture: Buffer,
     userType: String,
     friends: [ObjectId],
     requestedFriends: [ObjectId],

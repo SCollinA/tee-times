@@ -109,12 +109,11 @@ app.post('/register', (req, res, next) => {
     const name = req.body.name.toLowerCase()
     User.find({name}, (err, res) => {
         if (res.length === 0) {
-            const password = req.body.password
-            const userType = req.body.userType
+            const {password, picture, userType} = req.body.password
             const saltRounds = 10
             const salt = bcrypt.genSaltSync(saltRounds);
             const pwhash = bcrypt.hashSync(password, salt)
-            const newUser = new User({name, pwhash, userType})
+            const newUser = new User({name, pwhash, picture, userType})
             newUser.save((err, user) => {
                 if (err) {
                     return handleError(err)
