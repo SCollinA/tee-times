@@ -9,6 +9,7 @@ const bodyParser = require('body-parser')
 const assert = require('assert')
 const bcrypt = require('bcrypt')
 const fs = require('fs')
+require('dotenv').config()
 
 const app = express()
 const port = 3003
@@ -72,18 +73,10 @@ function getTeeTimes(_id) {
             // get the user
             return User.findOne({_id})
             .then(user => {
-                const userFriends = allUsers.filter(golfer => {
-                    if (golfer._id.toString() === user._id.toString()) {
-                        return false
-                    } else {
-                        return user.friends.find(friendshipID => golfer._id.toString() == friendshipID)
-                    }
-                })
                 return TeeTime.find({ golfers: {$all: [user]}})
                 .then(userTeeTimes => {
                     return {
                         user,
-                        userFriends,
                         userTeeTimes,
                         allUsers,
                         allTeeTimes
@@ -93,7 +86,6 @@ function getTeeTimes(_id) {
             .catch(err => {
                 return {
                     user: {},
-                    userFriends: [],
                     userTeeTimes: [],
                     allUsers,
                     allTeeTimes
@@ -111,18 +103,29 @@ app.post('/register', (req, res, next) => {
     const name = req.body.name.toLowerCase()
     User.find({name}, (err, res) => {
         if (res.length === 0) {
-            const {password, userType} = req.body
+            const {password, userType, adminPassword} = req.body
             const saltRounds = 10
             const salt = bcrypt.genSaltSync(saltRounds);
             const pwhash = bcrypt.hashSync(password, salt)
             const picture = req.body.picture || Buffer.from(fs.readFileSync('./golf_ball.png', 'binary'))
-            console.log(picture)
-            const newUser = new User({
-                name, 
-                pwhash, 
-                picture, 
-                userType
-            })
+            let newUser
+            if (adminPassword && bcrypt.compareSync(adminPassword, bcrypt.hashSync(process.env.ADMIN_PW, bcrypt.genSaltSync(saltRounds)))) {
+                console.log('good admin password')
+                newUser = new User({
+                    name, 
+                    pwhash, 
+                    picture, 
+                    userType
+                })
+            } else {
+                console.log('bad admin password')
+                newUser = new User({
+                    name, 
+                    pwhash, 
+                    picture, 
+                    userType: 'basic'
+                })
+            }
             newUser.save((err, user) => {
                 if (err) {
                     return handleError(err)
