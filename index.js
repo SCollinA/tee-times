@@ -8,6 +8,7 @@ const MongoDBStore = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
 const assert = require('assert')
 const bcrypt = require('bcrypt')
+const fs = require('fs')
 
 const app = express()
 const port = 3003
@@ -110,10 +111,12 @@ app.post('/register', (req, res, next) => {
     const name = req.body.name.toLowerCase()
     User.find({name}, (err, res) => {
         if (res.length === 0) {
-            const {password, picture, userType} = req.body
+            const {password, userType} = req.body
             const saltRounds = 10
             const salt = bcrypt.genSaltSync(saltRounds);
             const pwhash = bcrypt.hashSync(password, salt)
+            const picture = req.body.picture || Buffer.from(fs.readFileSync('./golf_ball.png', 'binary'))
+            console.log(picture)
             const newUser = new User({
                 name, 
                 pwhash, 
