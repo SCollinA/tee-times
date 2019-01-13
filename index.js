@@ -33,9 +33,8 @@ app.use(session({
     saveUninitialized: true,
 }))
 
-app.use(bodyParser.urlencoded({extended: false}))
-
-app.use(bodyParser.json())
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 function checkUser(req, res, next) {
     console.log('checking user')
