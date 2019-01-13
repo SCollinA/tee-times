@@ -205,7 +205,7 @@ app.post('/removeFriend', checkUser, (req, res, next) => {
 
 app.post('/updateUser', checkUser, (req, res, next) => {
     console.log('updating user')
-    const {name, currentPassword, picture} = req.body
+    const {name, currentPassword} = req.body
     User.findOne({name})
     .then(user => {
         if (bcrypt.compareSync(currentPassword, user.pwhash)) {
@@ -214,7 +214,7 @@ app.post('/updateUser', checkUser, (req, res, next) => {
             const updatingUser = req.body
             const newPassword = updatingUser.newPassword || currentPassword
             const newUsername = updatingUser.newUsername.toLowerCase() || name
-            const newPicture = updatingUser.newPicture || picture
+            const newPicture = updatingUser.newPicture.length < 1000000 && updatingUser.newPicture 
             // update the password if it has a value
             const saltRounds = 10
             const salt = bcrypt.genSaltSync(saltRounds)
@@ -225,7 +225,7 @@ app.post('/updateUser', checkUser, (req, res, next) => {
                     name: newUsername,
                     // either use the new hash password or the old one if not updated
                     pwhash: pwhash,
-                    picture: Buffer.from(newPicture)
+                    picture: newPicture ? Buffer.from(newPicture) : user.picture
                 } 
             ).then(() => {
                 User.findById(updatingUser._id)
