@@ -215,7 +215,6 @@ app.post('/updateUser', checkUser, (req, res, next) => {
             const newPassword = updatingUser.newPassword || currentPassword
             const newUsername = updatingUser.newUsername.toLowerCase() || name
             const newPicture = updatingUser.newPicture.length < 1000000 && updatingUser.newPicture
-            console.log(newPicture)
             !newPicture ? console.log(`image too large ${updatingUser.newPicture.length}`) : 
             console.log(`image just right :) ${updatingUser.newPicture.length}`)
             // update the password if it has a value
