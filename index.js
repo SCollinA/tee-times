@@ -73,7 +73,7 @@ function getTeeTimes(_id) {
             // get the user
             return User.findOne({_id})
             .then(user => {
-                return TeeTime.find({ golfers: {$all: [user]}})
+                return TeeTime.find({ golfers: {$all: [_id]}})
                 .then(userTeeTimes => {
                     return {
                         user,
