@@ -36,7 +36,11 @@ app.use(session({
     saveUninitialized: true,
 }))
 
-app.use(cors())
+// const corsOptions = {origin: 'https://evanprocter.com'}
+
+app.use(cors()) // set cors header on response
+
+app.options('*', cors()) // include before other routes
 
 app.use(bodyParser.urlencoded({extended: false}))
 
