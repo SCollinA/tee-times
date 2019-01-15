@@ -114,7 +114,7 @@ app.post('/register', (req, res, next) => {
             const saltRounds = 10
             const salt = bcrypt.genSaltSync(saltRounds);
             const pwhash = bcrypt.hashSync(password, salt)
-            const picture = req.body.picture || Buffer.from(fs.readFileSync('./golf_ball.png', 'binary'))
+            const picture = req.body.picture || Buffer.from(fs.readFileSync('golf_ball.png', 'binary'))
             let newUser
             if (adminPassword && bcrypt.compareSync(adminPassword, bcrypt.hashSync(process.env.ADMIN_PW, bcrypt.genSaltSync(saltRounds)))) {
                 console.log('good admin password')
