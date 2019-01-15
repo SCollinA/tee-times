@@ -20,6 +20,8 @@ const store = new MongoDBStore({
     collection: 'sessions'
 }) 
 
+app.set('trust proxy', 1) // trust first proxy
+
 // catch errors
 store.on('error', error => {
     assert.ifError(error)
@@ -40,9 +42,10 @@ app.use(session({
 
 // const corsOptions = {origin: 'https://evanprocter.com'}
 
+
 app.use(cors()) // set cors header on response
 
-app.options('*', cors()) // include before other routes
+app.options('*', cors()) // include before other routes to set pre-flight options
 
 app.use(bodyParser.urlencoded({extended: false}))
 
