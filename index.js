@@ -51,7 +51,7 @@ app.use(bodyParser.json({limit: '50mb'}));
 
 function checkUser(req, res, next) {
     console.log('checking user')
-    console.log(req.session.user, req.session.user._id)
+    console.log(req.session, req.session.user)
     if (req.session.user && req.session.user._id) {
         console.log('user is logged in')
         next()
