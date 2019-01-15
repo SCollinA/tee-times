@@ -2,7 +2,6 @@ const {User} = require ('./models/Users')
 const {TeeTime} = require('./models/TeeTimes')
 
 const express = require('express')
-const cors = require('cors')
 const mongoose = require('mongoose') 
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
@@ -18,7 +17,7 @@ mongoose.connect('mongodb://localhost:27017/tee-times-db', { useNewUrlParser: tr
 const store = new MongoDBStore({
     uri: 'mongodb://localhost:27017/tee-times-db',
     collection: 'sessions'
-})
+}) 
 
 // catch errors
 store.on('error', error => {
@@ -35,8 +34,6 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
 }))
-
-app.use(cors())
 
 app.use(bodyParser.urlencoded({extended: false}))
 
