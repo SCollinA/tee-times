@@ -13,4 +13,4 @@ const TeeTimeSchema = new Schema({
 
 const TeeTime = mongoose.model('TeeTime', TeeTimeSchema)
 
-module.exports = {TeeTime, TeeTimeSchema}
+module.exports = {TeeTime, TeeTimeSchema} 
