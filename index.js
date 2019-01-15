@@ -51,6 +51,7 @@ app.use(bodyParser.json({limit: '50mb'}));
 
 function checkUser(req, res, next) {
     console.log('checking user')
+    console.log(req.session.user, req.session.user._id)
     if (req.session.user && req.session.user._id) {
         console.log('user is logged in')
         next()
@@ -139,6 +140,7 @@ app.post('/register', (req, res, next) => {
                 } else {
                     console.log('new user saved')
                     req.session.user = user
+                    console.log(req.session.user)
                     next()
                 }
             })
@@ -159,6 +161,7 @@ app.post('/login', (req, res, next) => {
         if (bcrypt.compareSync(password, user.pwhash)) {
             console.log('good password')
             req.session.user = user
+            console.log(req.session.user)
         } 
         else {
             console.log('bad password')
