@@ -2,6 +2,7 @@ const {User} = require ('./models/Users')
 const {TeeTime} = require('./models/TeeTimes')
 
 const express = require('express')
+const cors = require('cors')
 const mongoose = require('mongoose') 
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
@@ -34,6 +35,8 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
 }))
+
+app.use(cors())
 
 app.use(bodyParser.urlencoded({extended: false}))
 
