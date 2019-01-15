@@ -40,10 +40,9 @@ app.use(session({
     saveUninitialized: true,
 }))
 
-// const corsOptions = {origin: 'https://evanprocter.com'}
+const corsOptions = {credentials: true}
 
-
-app.use(cors()) // set cors header on response
+app.use(cors(corsOptions)) // set cors header on response
 
 app.options('*', cors()) // include before other routes to set pre-flight options
 
@@ -62,6 +61,7 @@ function checkUser(req, res, next) {
         next()
     } else {
         console.log('user is NOT logged in')
+        
         res.redirect('/login')
     }
 }
