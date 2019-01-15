@@ -36,7 +36,7 @@ app.use(session({
       secure: true,
     },
     store,
-    resave: true,
+    resave: false,
     saveUninitialized: true,
 }))
 
