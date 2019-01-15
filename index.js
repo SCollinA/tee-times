@@ -40,7 +40,10 @@ app.use(session({
     saveUninitialized: true,
 }))
 
-const corsOptions = {credentials: true}
+const corsOptions = {
+    origin: true,
+    credentials: true
+}
 
 app.use(cors(corsOptions)) // set cors header on response
 
