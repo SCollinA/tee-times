@@ -51,6 +51,8 @@ app.options('*', cors()) // include before other routes to set pre-flight option
 
 app.use(bodyParser.urlencoded({extended: false}))
 
+app.use(express.static('build'))
+
 // app.use(bodyParser.json())
 
 app.use(bodyParser.json({limit: '50mb'}));
