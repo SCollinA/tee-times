@@ -19,8 +19,6 @@ const store = new MongoDBStore({
     collection: 'sessions'
 }) 
 
-app.set('trust proxy', 1) // trust first proxy
-
 // catch errors
 store.on('error', error => {
     assert.ifError(error)
@@ -31,8 +29,6 @@ app.use(session({
     secret: 'random123',
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-      httpOnly: true, 
-      secure: false,
     },
     store,
     resave: false,
