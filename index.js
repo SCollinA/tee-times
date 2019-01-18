@@ -37,7 +37,7 @@ app.use(session({
 
 app.use(bodyParser.urlencoded({extended: false}))
 
-app.use(express.static('build'))
+app.use(express.static('public'))
 
 // app.use(bodyParser.json())
 
