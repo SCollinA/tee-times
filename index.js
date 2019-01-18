@@ -2,7 +2,6 @@ const {User} = require ('./models/Users')
 const {TeeTime} = require('./models/TeeTimes')
 
 const express = require('express')
-const cors = require('cors')
 const mongoose = require('mongoose') 
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
@@ -38,16 +37,7 @@ app.use(session({
     store,
     resave: false,
     saveUninitialized: true,
-}))
-
-const corsOptions = {
-    origin: true,
-    credentials: true
-}
-
-app.use(cors(corsOptions)) // set cors header on response
-
-app.options('*', cors()) // include before other routes to set pre-flight options
+})) 
 
 app.use(bodyParser.urlencoded({extended: false}))
 
