@@ -99,6 +99,7 @@ function getTeeTimes(_id) {
     })
 }
 
+// this route is requested when the app loads
 app.get('/data', sendTeeTimes)
 
 // create user 
