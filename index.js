@@ -135,9 +135,13 @@ app.post('/register', (req, res, next) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    console.log('new user saved', user)
+                    // this console log breaks on server
+                    // something about string format value invalid count
+                    // console.log('new user saved', user)
+                    console.log('new user saved')
                     req.session.user = user
-                    console.log(req.session.user)
+                    // this console log breaks on server
+                    // console.log(req.session.user)
                     next()
                 }
             })
