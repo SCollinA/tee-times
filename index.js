@@ -131,12 +131,12 @@ app.post('/register', (req, res, next) => {
                     userType: 'basic'
                 })
             }
-            newUser.save((err, user) => {
+            newUser.save(err => {
                 if (err) {
                     console.log(err)
                 } else {
-                    console.log('new user saved', user)
-                    req.session.user = user
+                    console.log('new user saved', newUser)
+                    req.session.user = newUser
                     console.log(req.session.user)
                     next()
                 }
