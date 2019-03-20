@@ -135,7 +135,7 @@ app.post('/register', (req, res, next) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    console.log('new user saved')
+                    console.log('new user saved', user)
                     req.session.user = user
                     console.log(req.session.user)
                     next()
